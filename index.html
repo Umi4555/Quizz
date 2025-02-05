@@ -1,0 +1,109 @@
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Quiz</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <a href="https://umi4555.github.io/Lyc-e/" class="home-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+            Retour à l'accueil
+        </a>
+
+        <div v-if="!currentQuiz" class="quiz-selection">
+            <div class="quiz-header">
+                <h2>Choisissez votre Domaine</h2>
+            </div>
+            <div class="quiz-list">
+                <div 
+                    v-for="quiz in quizzes" 
+                    :key="quiz.id" 
+                    class="quiz-card"
+                    @click="startQuiz(quiz)"
+                >
+                    <h3>{{ quiz.title }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div v-else class="quiz-container">
+            <header>
+                <button @click="resetQuiz" class="back-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/>
+                    </svg>
+                </button>
+                <h1>{{ currentQuiz.title }}</h1>
+            </header>
+
+            <div v-if="!quizCompleted" class="quiz-content">
+                <div class="question-block">
+                    <h3>{{ currentQuestion.text }}</h3>
+                    <div class="options">
+                        <button 
+                            v-for="(option, optIndex) in shuffledOptions" 
+                            :key="optIndex"
+                            @click="selectAnswer(option.originalIndex)"
+                            :class="{ 
+                                'selected': selectedAnswer !== null && selectedAnswer === option.originalIndex
+                            }"
+                        >
+                            {{ option.text }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div v-else class="quiz-completed">
+                <h2>Merci pour votre participation !</h2>
+                <p class="thank-you-message">Vous avez terminé le quiz.</p>
+                <div class="quiz-end-actions">
+                    <button @click="resetQuiz" class="action-btn retry-btn">
+                        Réessayer
+                    </button>
+                    <button @click="returnToDomainSelection" class="action-btn select-domain-btn">
+                        Choisir un autre domaine
+                    </button>
+                </div>
+                <div class="result-details">
+                    <h3>Détails des Réponses</h3>
+                    <ul>
+                        <li 
+                            v-for="(question, index) in currentQuiz.questions" 
+                            :key="index"
+                            :class="{ 'correct-answer': question.correctAnswer === userAnswers[index], 'wrong-answer': question.correctAnswer !== userAnswers[index] }"
+                        >
+                            Question {{ index + 1 }}: 
+                            {{ question.correctAnswer === userAnswers[index] ? 'Correct' : 'Incorrect' }}
+                            <span v-if="question.correctAnswer !== userAnswers[index]">
+                                (Réponse correcte: {{ currentQuiz.questions[index].options[question.correctAnswer] }})
+                            </span>
+                        </li>
+                    </ul>
+                    <div class="final-score">
+                        Votre score : {{ score }}/{{ currentQuiz.questions.length }}
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="!quizCompleted" class="quiz-footer">
+                <button 
+                    @click="nextQuestion" 
+                    :disabled="selectedAnswer === null"
+                    class="submit-btn"
+                >
+                    {{ isLastQuestion ? 'Terminer' : 'Suivant' }}
+                </button>
+                <p class="score">Question {{ currentQuestionIndex + 1 }}/{{ currentQuiz.questions.length }}</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
